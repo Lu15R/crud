@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Asegurarse de que el formulario y la tabla estén en bloques separados */
+        #formulario {
+            clear: both;
+            margin-bottom: 20px;
+        }
+        #tabla_datos {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <form id="formulario">
+        <label for="texto">Texto:</label>
+        <input type="text" id="texto" name="texto" required>
+
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="texto_largo">Texto Largo:</label>
+        <textarea id="texto_largo" name="texto_largo" rows="4" required></textarea>
+
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" required>
+
+        <label for="imagen">Seleccionar Imagen:</label>
+        <input type="file" id="imagen" name="imagen" accept="image/*">
+
+        <div class="switch-container">
+            <label for="bd_switch">Guardar en MySQL o en MongoDB:</label>
+            <label class="switch">
+                <input type="checkbox" id="bd_switch" name="bd_switch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <h3>Datos Guardados</h3>
+    <table id="tabla_datos" class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Texto</th>
+                <th>Contraseña</th>
+                <th>Texto Largo</th>
+                <th>Fecha</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se llenarán aquí con JavaScript -->
+        </tbody>
+    </table>
+
+    <h3>Editar Registro</h3>
+    <form id="form_editar">
+        <input type="hidden" id="id_editar">
+        <label for="texto_editar">Texto:</label>
+        <input type="text" id="texto_editar" required>
+        
+        <label for="password_editar">Contraseña:</label>
+        <input type="password" id="password_editar" required>
+        
+        <label for="texto_largo_editar">Texto Largo:</label>
+        <textarea id="texto_largo_editar" rows="4" required></textarea>
+        
+        <label for="fecha_editar">Fecha:</label>
+        <input type="date" id="fecha_editar" required>
+        
+        <button type="button" onclick="guardarEdicion()">Guardar cambios</button>
+    </form>
+
+    <!-- Enlace al archivo JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
