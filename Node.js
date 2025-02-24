@@ -4,22 +4,22 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const path = require("path");
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static("uploads")); 
+app.use(express.static("uploads"));
 
-//  Configurar conexión a MySQL
+// Configurar conexión a MySQL
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "", 
+    password: "",
     database: "formulario_crud",
 });
 
-//  Verificar conexión a MySQL
+// Verificar conexión a MySQL
 db.connect((err) => {
     if (err) {
         console.error("Error de conexión a MySQL:", err);
@@ -28,7 +28,7 @@ db.connect((err) => {
     }
 });
 
-//  Conectar a MongoDB con Mongoose
+// Conectar a MongoDB con Mongoose
 mongoose.connect("mongodb://localhost:27017/formulario_crud", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -36,7 +36,7 @@ mongoose.connect("mongodb://localhost:27017/formulario_crud", {
 .then(() => console.log("✅ Conectado a MongoDB"))
 .catch((err) => console.error("Error de conexión a MongoDB:", err));
 
-//  Definir el Schema y Modelo para MongoDB
+// Definir el Schema y Modelo para MongoDB
 const formularioSchema = new mongoose.Schema({
     texto: { type: String, required: true },
     password: { type: String, required: true },
@@ -46,7 +46,6 @@ const formularioSchema = new mongoose.Schema({
 });
 const Formulario = mongoose.model("Formulario", formularioSchema);
 
-
 const storage = multer.diskStorage({
     destination: "./uploads/",
     filename: (req, file, cb) => {
@@ -55,17 +54,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-//  Ruta para la página principal
+// Función de validación
+function validarTextoLargo(textoLargo) {
+    return !(/^\s|\s$|\s{2,}/.test(textoLargo));
+}
+
+// Ruta para la página principal
 app.get("/", (req, res) => {
     res.send("Servidor Express funcionando correctamente.");
 });
 
-
-
-
 // POST - Insertar datos en MySQL
 app.post("/agregar", upload.single("imagen"), (req, res) => {
     const { texto, password, texto_largo, fecha } = req.body;
+    if (!validarTextoLargo(texto_largo)) {
+        return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+    }
     const imagen = req.file ? req.file.filename : null;
 
     const sql = "INSERT INTO formulario (texto, password, texto_largo, fecha, imagen) VALUES (?, ?, ?, ?, ?)";
@@ -110,6 +114,9 @@ app.delete("/eliminar/:id", (req, res) => {
 app.put("/actualizar/:id", upload.single("imagen"), (req, res) => {
     const { id } = req.params;
     const { texto, password, texto_largo, fecha } = req.body;
+    if (!validarTextoLargo(texto_largo)) {
+        return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+    }
     const imagen = req.file ? req.file.filename : null;
 
     let sql;
@@ -133,12 +140,13 @@ app.put("/actualizar/:id", upload.single("imagen"), (req, res) => {
     });
 });
 
-
-
 // POST - Insertar datos en MongoDB
 app.post("/agregarMongo", upload.single("imagen"), async (req, res) => {
     try {
         const { texto, password, texto_largo, fecha } = req.body;
+        if (!validarTextoLargo(texto_largo)) {
+            return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+        }
         const imagen = req.file ? req.file.filename : null;
 
         const nuevoFormulario = new Formulario({
@@ -185,6 +193,9 @@ app.put("/actualizarMongo/:id", upload.single("imagen"), async (req, res) => {
     try {
         const { id } = req.params;
         const { texto, password, texto_largo, fecha } = req.body;
+        if (!validarTextoLargo(texto_largo)) {
+            return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+        }
         const imagen = req.file ? req.file.filename : null;
 
         const updateData = { texto, password, texto_largo, fecha };
@@ -200,9 +211,8 @@ app.put("/actualizarMongo/:id", upload.single("imagen"), async (req, res) => {
     }
 });
 
-//  Iniciar servidor
+// Iniciar servidor
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
-
