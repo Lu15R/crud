@@ -188,7 +188,7 @@ app.delete("/eliminarMongo/:id", async (req, res) => {
     }
 });
 
-// PUT - Actualizar un dato por ID en MongoDB
+// PUT - Actualizar un dato por ID en MongoDB......
 app.put("/actualizarMongo/:id", upload.single("imagen"), async (req, res) => {
     try {
         const { id } = req.params;
