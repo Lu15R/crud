@@ -1,19 +1,23 @@
+// Validación y envío del formulario principal
 document.getElementById("formulario").addEventListener("submit", async function (event) {
+    event.preventDefault();
     const textoLargo = document.getElementById('texto_largo').value;
     const password = document.getElementById('password').value;
-    if (/^\s|\s$|\s{2,}/.test(textoLargo)) {
-        event.preventDefault();
+    
+    // Validar que "Texto Largo" no comience ni termine con espacios
+    if (/^\s/.test(textoLargo) || /\s$/.test(textoLargo)) {
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'No se permiten espacios en blanco en el campo Texto Largo.',
+            text: 'El campo Texto Largo no debe comenzar ni terminar con espacios.',
             confirmButtonColor: '#3085d6',
             confirmButtonText: 'Entendido'
         });
         return;
     }
-    if (!/^[A-Za-z0-9.]*$/.test(password)) {
-        event.preventDefault();
+    
+    // Validar que la contraseña contenga solo letras (incluyendo Ñ/ñ), números y puntos
+    if (!/^[A-Za-zÑñ0-9.]+$/.test(password)) {
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -23,7 +27,7 @@ document.getElementById("formulario").addEventListener("submit", async function 
         });
         return;
     }
-    event.preventDefault();
+    
     const formData = new FormData(this);
     const switchEstado = document.getElementById("bd_switch").checked;
     const url = switchEstado ? "http://localhost:3000/agregarMongo" : "http://localhost:3000/agregar";
@@ -53,20 +57,35 @@ document.getElementById("formulario").addEventListener("submit", async function 
     });
 });
 
+// Validación para la selección de imagen en el formulario principal
 document.getElementById("imagen").addEventListener("change", function (e) {
     const file = e.target.files[0];
-    if (file && !file.type.startsWith("image/")) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Selecciona una imagen',
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Entendido'
-        });
-        e.target.value = "";
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+
+    if (file) {
+        if (!file.type.startsWith("image/")) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Selecciona una imagen',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Entendido'
+            });
+            e.target.value = "";
+        } else if (file.size > maxSize) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La imagen no debe superar los 2 MB',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Entendido'
+            });
+            e.target.value = "";
+        }
     }
 });
 
+// Cargar y mostrar datos en la tabla
 async function cargarDatos() {
     const switchEstado = document.getElementById("tabla_switch").checked;
     const url = switchEstado ? "http://localhost:3000/datosMongo" : "http://localhost:3000/datos";
@@ -94,6 +113,7 @@ async function cargarDatos() {
     });
 }
 
+// Eliminar registro con confirmación
 async function eliminarRegistro(id) {
     Swal.fire({
         title: '¡Cuidado!',
@@ -122,6 +142,7 @@ async function eliminarRegistro(id) {
     });
 }
 
+// Abrir modal y cargar datos en el formulario de edición
 function editarRegistro(id) {
     const registro = document.querySelector(`#registro_${id}`);
     document.getElementById("id_editar").value = id;
@@ -139,8 +160,37 @@ function editarRegistro(id) {
         imgTag.src = "";
     }
     document.getElementById("modal_editar").style.display = "block";
+ 
+    // Validación para la selección de imagen en el formulario de edición
+    document.getElementById("imagen_editar").addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        const maxSize = 2 * 1024 * 1024; // 2 MB
+
+        if (file) {
+            if (!file.type.startsWith("image/")) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Selecciona una imagen',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Entendido'
+                });
+                e.target.value = "";
+            } else if (file.size > maxSize) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'La imagen no debe superar los 2 MB',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Entendido'
+                });
+                e.target.value = "";
+            }
+        }
+    });
 }
 
+// Función para guardar la edición
 async function guardarEdicion() {
     const id = document.getElementById("id_editar").value;
     const texto = document.getElementById("texto_editar").value;
@@ -182,22 +232,26 @@ async function guardarEdicion() {
     });
 }
 
+// Validación y envío del formulario del modal de edición
 document.getElementById('form_editar').addEventListener('submit', function(event) {
+    event.preventDefault();
     const textoLargoEditar = document.getElementById('texto_largo_editar').value;
     const passwordEditar = document.getElementById('password_editar').value;
-    if (/^\s|\s$|\s{2,}/.test(textoLargoEditar)) {
-        event.preventDefault();
+
+    // Validar que "Texto Largo" no comience ni termine con espacios
+    if (/^\s/.test(textoLargoEditar) || /\s$/.test(textoLargoEditar)) {
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'No se permiten espacios en blanco en el campo Texto Largo.',
+            text: 'El campo "Texto Largo" no debe comenzar ni terminar con espacios.',
             confirmButtonColor: '#d33',
             confirmButtonText: 'Entendido'
         });
         return;
     }
-    if (!/^[A-Za-z0-9.]*$/.test(passwordEditar)) {
-        event.preventDefault();
+
+    // Validar que la contraseña contenga solo letras (incluyendo Ñ/ñ), números y puntos
+    if (!/^[A-Za-zÑñ0-9.]+$/.test(passwordEditar)) {
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -210,10 +264,12 @@ document.getElementById('form_editar').addEventListener('submit', function(event
     guardarEdicion();
 });
 
+// Función para cerrar el modal
 function cerrarModal() {
     document.getElementById("modal_editar").style.display = "none";
 }
 
+// Inicializar carga de datos y actualizar títulos
 window.onload = () => {
     actualizarTituloDatos();
     cargarDatos();
@@ -228,6 +284,7 @@ document.getElementById("tabla_switch").addEventListener("change", () => {
     cargarDatos();
 });
 
+// Actualizar textos de los switches según su estado
 document.addEventListener("DOMContentLoaded", function () {
     const bdSwitch = document.getElementById("bd_switch");
     const switchLabel = document.getElementById("switchLabel");
@@ -250,6 +307,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// Actualizar título de la sección de datos según la base de datos seleccionada
 function actualizarTituloDatos() {
     const switchEstado = document.getElementById("tabla_switch").checked;
     const titulo = document.getElementById("titulo_datos");

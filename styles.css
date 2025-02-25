@@ -266,9 +266,9 @@ form_editar {
 }
 
 .close {
-    color: #aaa;
+    color: #d70b0b;
     float: right;
-    font-size: 28px;
+    font-size: 40px;
     font-weight: bold;
 }
 
@@ -282,10 +282,16 @@ form_editar {
 #tabla_datos img {
     width: 100px; 
     height: auto; 
-  }
+}
 
-  #tabla_datos img {
+#tabla_datos img {
     width: 100px; 
     height: 100px;
     object-fit: cover; 
+}
+
+#modal {
+    
+    opacity: 0.95; 
+    border: 1px solid #000; 
 }
