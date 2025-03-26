@@ -313,3 +313,68 @@ function actualizarTituloDatos() {
     const titulo = document.getElementById("titulo_datos");
     titulo.textContent = switchEstado ? "Datos guardados en MongoDB" : "Datos guardados en MySQL";
 }
+
+
+//Nueva agregacion de Funcion para la busqueda de datos
+// Función para obtener la URL de datos (común para carga y búsqueda)
+// Función que realiza la búsqueda y actualiza la tabla
+
+
+// Función que consulta ambos endpoints y devuelve una lista combinada de resultados
+async function buscarEnBases(query) {
+    try {
+      // Realiza ambas peticiones de forma concurrente
+      const [mysqlRes, mongoRes] = await Promise.all([
+        fetch(`http://localhost:3000/buscar?query=${encodeURIComponent(query)}`),
+        fetch(`http://localhost:3000/buscarMongo?query=${encodeURIComponent(query)}`)
+      ]);
+      const mysqlData = await mysqlRes.json();
+      const mongoData = await mongoRes.json();
+      
+      // Combina los resultados; si deseas mantenerlos separados puedes mostrarlos en secciones diferentes.
+      const resultadosCombinados = [...mysqlData, ...mongoData];
+      return resultadosCombinados;
+    } catch (error) {
+      console.error("Error en la búsqueda:", error);
+      return [];
+    }
+  }
+  
+  // Función para renderizar los resultados en la tabla
+function renderizarResultados(resultados) {
+    const tbody = document.querySelector("#results-table tbody");
+    tbody.innerHTML = "";
+    resultados.forEach(item => {
+      // Se asume que el campo "texto" es el que se usó para la búsqueda
+      const id = item.id || item._id; // en MySQL se podría tener 'id' y en MongoDB '_id'
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+        <td>${id}</td>
+        <td>${item.texto || ""}</td>
+        <td>${item.password || ""}</td>
+        <td>${item.texto_largo || ""}</td>
+        <td>${item.fecha ? new Date(item.fecha).toLocaleDateString() : ""}</td>
+        <td>${item.imagen ? `<img src="uploads/${item.imagen}" alt="imagen" width="100">` : "No hay imagen"}</td>
+    `;
+    tbody.appendChild(fila);
+    });
+ }
+  
+  // Función que maneja la búsqueda
+  async function realizarBusqueda() {
+    const query = document.getElementById("search-input").value.trim();
+    if (!query) return; // Si está vacío, no se realiza la búsqueda
+    const resultados = await buscarEnBases(query);
+    renderizarResultados(resultados);
+  }
+  
+  // Asignar eventos para el botón y para presionar Enter en el input
+  document.getElementById("search-button").addEventListener("click", realizarBusqueda);
+  
+  document.getElementById("search-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Evita que se envíe un formulario (si es que estuviera dentro de uno)
+      realizarBusqueda();
+    }
+  });
+  

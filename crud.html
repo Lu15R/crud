@@ -69,6 +69,35 @@
   
   <div class="container">
     <h3 id="titulo_datos">Datos Guardados</h3>
+
+
+    <div><!-- Contenedor para las busquedas, Nueva agregacion -->
+      <h1>Buscador de Registros</h1>
+    <!-- Contenedor de la barra de búsqueda -->
+    <div id="search-container">
+      <input type="text" id="search-input" placeholder="Buscar en Texto...">
+      <button id="search-button">Buscar</button>
+    </div>
+    
+    <!-- Tabla para mostrar los resultados -->
+    <table id="results-table" class="table table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Texto</th>
+          <th>Contraseña</th>
+          <th>Texto Largo</th>
+          <th>Fecha</th>
+          <th>Imagen</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Aquí se insertarán los resultados -->
+      </tbody>
+    </table>
+
+    
+
     <div class="switch-container">
       <span id="tablaSwitchLabel">Mostrar datos de MySQL (Desliza para cambiar)</span>
       <label class="switch">
