@@ -20,8 +20,6 @@
         pattern="^(?!\s)(?!.*\s$)[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$" 
         title="Solo se permiten letras y no debe contener espacios al inicio o al final." 
         required>    
-  
-
       
       <label for="password">Contraseña:</label>
       <input 
@@ -33,9 +31,6 @@
         pattern="^[A-Za-zÑñ0-9.]+$" 
         title="La contraseña debe tener entre 8 y 25 caracteres y solo puede contener letras, números y puntos" 
         required>    
-          
-      
-
       
       <label for="texto_largo">Texto Largo:</label>
       <textarea 
@@ -46,7 +41,6 @@
         title="El texto debe comenzar y terminar sin espacios. Los espacios en medio están permitidos. Ejemplo correcto: 'Kevin Jesus'" 
         required></textarea>
         
-      
       <label for="fecha">Fecha:</label>
       <input type="date" id="fecha" name="fecha" required>
       
@@ -67,20 +61,17 @@
   
   <br> <br>
   
+  <!-- Sección del Buscador -->
   <div class="container">
-    <h3 id="titulo_datos">Datos Guardados</h3>
-
-
-    <div><!-- Contenedor para las busquedas, Nueva agregacion -->
-      <h1>Buscador de Registros</h1>
+    <h1>Buscador de Registros</h1>
     <!-- Contenedor de la barra de búsqueda -->
     <div id="search-container">
       <input type="text" id="search-input" placeholder="Buscar en Texto...">
       <button id="search-button">Buscar</button>
     </div>
     
-    <!-- Tabla para mostrar los resultados -->
-    <table id="results-table" class="table table-bordered">
+    <!-- Tabla para mostrar los resultados de la búsqueda -->
+    <table id="tabla_busqueda" class="table">
       <thead>
         <tr>
           <th>ID</th>
@@ -89,15 +80,17 @@
           <th>Texto Largo</th>
           <th>Fecha</th>
           <th>Imagen</th>
+          
         </tr>
       </thead>
       <tbody>
-        <!-- Aquí se insertarán los resultados -->
+        <!-- Aquí se cargarán los registros de la búsqueda -->
       </tbody>
     </table>
-
-    
-
+  </div>
+  
+  <!-- Sección para mostrar todos los registros -->
+  <div class="container">
     <div class="switch-container">
       <span id="tablaSwitchLabel">Mostrar datos de MySQL (Desliza para cambiar)</span>
       <label class="switch">
@@ -118,11 +111,11 @@
         </tr>
       </thead>
       <tbody>
+        <!-- Aquí se cargarán todos los registros -->
       </tbody>
     </table>
   </div>
   
-  <!-- Modal para editar registro -->
   <!-- Modal para editar registro -->
   <div id="modal_editar" class="modal">
     <div id="modal" class="modal-content">
@@ -174,8 +167,6 @@
     </div>
   </div>
 
-  </div>
-  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
 </body>

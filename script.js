@@ -1,4 +1,4 @@
-// Validación y envío del formulario principal
+// VALIDACIÓN Y ENVÍO DEL FORMULARIO PRINCIPAL
 document.getElementById("formulario").addEventListener("submit", async function (event) {
     event.preventDefault();
     const textoLargo = document.getElementById('texto_largo').value;
@@ -57,7 +57,7 @@ document.getElementById("formulario").addEventListener("submit", async function 
     });
 });
 
-// Validación para la selección de imagen en el formulario principal
+// VALIDACIÓN PARA LA SELECCIÓN DE IMAGEN (FORMULARIO PRINCIPAL)
 document.getElementById("imagen").addEventListener("change", function (e) {
     const file = e.target.files[0];
     const maxSize = 2 * 1024 * 1024; // 2 MB
@@ -85,7 +85,7 @@ document.getElementById("imagen").addEventListener("change", function (e) {
     }
 });
 
-// Cargar y mostrar datos en la tabla
+// CARGAR Y MOSTRAR TODOS LOS REGISTROS EN LA TABLA DE DATOS
 async function cargarDatos() {
     const switchEstado = document.getElementById("tabla_switch").checked;
     const url = switchEstado ? "http://localhost:3000/datosMongo" : "http://localhost:3000/datos";
@@ -113,7 +113,7 @@ async function cargarDatos() {
     });
 }
 
-// Eliminar registro con confirmación
+// ELIMINAR REGISTRO CON CONFIRMACIÓN
 async function eliminarRegistro(id) {
     Swal.fire({
         title: '¡Cuidado!',
@@ -142,7 +142,7 @@ async function eliminarRegistro(id) {
     });
 }
 
-// Abrir modal y cargar datos en el formulario de edición
+// ABRIR MODAL Y CARGAR DATOS EN EL FORMULARIO DE EDICIÓN
 function editarRegistro(id) {
     const registro = document.querySelector(`#registro_${id}`);
     document.getElementById("id_editar").value = id;
@@ -160,8 +160,8 @@ function editarRegistro(id) {
         imgTag.src = "";
     }
     document.getElementById("modal_editar").style.display = "block";
- 
-    // Validación para la selección de imagen en el formulario de edición
+
+    // VALIDACIÓN PARA LA SELECCIÓN DE IMAGEN EN EL FORMULARIO DE EDICIÓN
     document.getElementById("imagen_editar").addEventListener("change", function (e) {
         const file = e.target.files[0];
         const maxSize = 2 * 1024 * 1024; // 2 MB
@@ -190,7 +190,7 @@ function editarRegistro(id) {
     });
 }
 
-// Función para guardar la edición
+// GUARDAR LA EDICIÓN
 async function guardarEdicion() {
     const id = document.getElementById("id_editar").value;
     const texto = document.getElementById("texto_editar").value;
@@ -232,13 +232,12 @@ async function guardarEdicion() {
     });
 }
 
-// Validación y envío del formulario del modal de edición
+// VALIDACIÓN Y ENVÍO DEL FORMULARIO DEL MODAL DE EDICIÓN
 document.getElementById('form_editar').addEventListener('submit', function(event) {
     event.preventDefault();
     const textoLargoEditar = document.getElementById('texto_largo_editar').value;
     const passwordEditar = document.getElementById('password_editar').value;
 
-    // Validar que "Texto Largo" no comience ni termine con espacios
     if (/^\s/.test(textoLargoEditar) || /\s$/.test(textoLargoEditar)) {
         Swal.fire({
             icon: 'error',
@@ -250,7 +249,6 @@ document.getElementById('form_editar').addEventListener('submit', function(event
         return;
     }
 
-    // Validar que la contraseña contenga solo letras (incluyendo Ñ/ñ), números y puntos
     if (!/^[A-Za-zÑñ0-9.]+$/.test(passwordEditar)) {
         Swal.fire({
             icon: 'error',
@@ -264,12 +262,12 @@ document.getElementById('form_editar').addEventListener('submit', function(event
     guardarEdicion();
 });
 
-// Función para cerrar el modal
+// FUNCION PARA CERRAR EL MODAL
 function cerrarModal() {
     document.getElementById("modal_editar").style.display = "none";
 }
 
-// Inicializar carga de datos y actualizar títulos
+// INICIALIZACIÓN: CARGA DE DATOS Y ACTUALIZACIÓN DE TÍTULOS
 window.onload = () => {
     actualizarTituloDatos();
     cargarDatos();
@@ -284,7 +282,7 @@ document.getElementById("tabla_switch").addEventListener("change", () => {
     cargarDatos();
 });
 
-// Actualizar textos de los switches según su estado
+// ACTUALIZAR TEXTOS DE LOS SWITCHES SEGÚN SU ESTADO
 document.addEventListener("DOMContentLoaded", function () {
     const bdSwitch = document.getElementById("bd_switch");
     const switchLabel = document.getElementById("switchLabel");
@@ -307,74 +305,73 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Actualizar título de la sección de datos según la base de datos seleccionada
+// ACTUALIZAR TÍTULO DE LA SECCIÓN DE DATOS SEGÚN LA BASE DE DATOS SELECCIONADA
 function actualizarTituloDatos() {
     const switchEstado = document.getElementById("tabla_switch").checked;
     const titulo = document.getElementById("titulo_datos");
-    titulo.textContent = switchEstado ? "Datos guardados en MongoDB" : "Datos guardados en MySQL";
+    if(titulo) {
+      titulo.textContent = switchEstado ? "Datos guardados en MongoDB" : "Datos guardados en MySQL";
+    }
 }
 
-
-//Nueva agregacion de Funcion para la busqueda de datos
-// Función para obtener la URL de datos (común para carga y búsqueda)
-// Función que realiza la búsqueda y actualiza la tabla
-
-
-// Función que consulta ambos endpoints y devuelve una lista combinada de resultados
-async function buscarEnBases(query) {
-    try {
-      // Realiza ambas peticiones de forma concurrente
-      const [mysqlRes, mongoRes] = await Promise.all([
-        fetch(`http://localhost:3000/buscar?query=${encodeURIComponent(query)}`),
-        fetch(`http://localhost:3000/buscarMongo?query=${encodeURIComponent(query)}`)
-      ]);
-      const mysqlData = await mysqlRes.json();
-      const mongoData = await mongoRes.json();
-      
-      // Combina los resultados; si deseas mantenerlos separados puedes mostrarlos en secciones diferentes.
-      const resultadosCombinados = [...mysqlData, ...mongoData];
-      return resultadosCombinados;
-    } catch (error) {
-      console.error("Error en la búsqueda:", error);
-      return [];
+// NUEVA FUNCIÓN PARA LA BÚSQUEDA DE REGISTROS
+function buscarRegistros(query) {
+    const switchEstado = document.getElementById("tabla_switch").checked;
+    let url;
+    if (switchEstado) {
+      // Búsqueda en MongoDB
+      url = `http://localhost:3000/buscarMongo?query=${encodeURIComponent(query)}`;
+    } else {
+      // Búsqueda en MySQL
+      url = `http://localhost:3000/buscar?query=${encodeURIComponent(query)}`;
     }
+  
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.querySelector("#tabla_busqueda tbody");
+        tbody.innerHTML = "";
+        
+        if (data.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Sin coincidencias',
+            text: 'No se han encontrado coincidencias',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+        
+        data.forEach((item) => {
+          const id = item.id || item._id;
+          const tr = document.createElement("tr");
+          tr.id = `registro_${id}`;
+          tr.innerHTML = `
+            <td>${id}</td>
+            <td class="texto">${item.texto}</td>
+            <td class="password">${item.password}</td>
+            <td class="texto_largo">${item.texto_largo}</td>
+            <td class="fecha">${new Date(item.fecha).toLocaleDateString()}</td>
+            <td>${item.imagen ? `<img src="uploads/${item.imagen}" alt="imagen" width="100">` : "No hay imagen"}</td>
+            
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(error => console.error('Error en la búsqueda:', error));
   }
   
-  // Función para renderizar los resultados en la tabla
-function renderizarResultados(resultados) {
-    const tbody = document.querySelector("#results-table tbody");
-    tbody.innerHTML = "";
-    resultados.forEach(item => {
-      // Se asume que el campo "texto" es el que se usó para la búsqueda
-      const id = item.id || item._id; // en MySQL se podría tener 'id' y en MongoDB '_id'
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-        <td>${id}</td>
-        <td>${item.texto || ""}</td>
-        <td>${item.password || ""}</td>
-        <td>${item.texto_largo || ""}</td>
-        <td>${item.fecha ? new Date(item.fecha).toLocaleDateString() : ""}</td>
-        <td>${item.imagen ? `<img src="uploads/${item.imagen}" alt="imagen" width="100">` : "No hay imagen"}</td>
-    `;
-    tbody.appendChild(fila);
-    });
- }
-  
-  // Función que maneja la búsqueda
-  async function realizarBusqueda() {
-    const query = document.getElementById("search-input").value.trim();
-    if (!query) return; // Si está vacío, no se realiza la búsqueda
-    const resultados = await buscarEnBases(query);
-    renderizarResultados(resultados);
+
+// EVENTOS PARA LA BARRA DE BÚSQUEDA (botón y Enter)
+document.getElementById('search-button').addEventListener('click', () => {
+  const query = document.getElementById('search-input').value.trim();
+  buscarRegistros(query);
+});
+
+document.getElementById('search-input').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    const query = this.value.trim();
+    buscarRegistros(query);
   }
-  
-  // Asignar eventos para el botón y para presionar Enter en el input
-  document.getElementById("search-button").addEventListener("click", realizarBusqueda);
-  
-  document.getElementById("search-input").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Evita que se envíe un formulario (si es que estuviera dentro de uno)
-      realizarBusqueda();
-    }
-  });
-  
+});
