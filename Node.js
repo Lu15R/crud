@@ -194,30 +194,38 @@ app.put("/actualizarMongo/:id", upload.single("imagen"), async (req, res) => {
 // MySQL
 app.get("/buscar", (req, res) => {
     const { query } = req.query;
-    const sql = "SELECT * FROM formulario WHERE texto LIKE ?";
-    db.query(sql, [`%${query}%`], (err, results) => {
-        if (err) {
-            console.error("Error en la búsqueda MySQL:", err);
-            return res.status(500).json({ message: "Error en la búsqueda MySQL" });
-        }
-        res.status(200).json(results);
+    if (!query) {
+      return res.status(400).json({ message: "El parámetro de búsqueda es requerido" });
+    }
+    const searchTerm = "%" + query + "%";
+    const sql = "SELECT * FROM formulario WHERE texto LIKE ? OR texto_largo LIKE ?";
+    db.query(sql, [searchTerm, searchTerm], (err, results) => {
+      if (err) {
+        console.error("Error en la búsqueda en MySQL:", err);
+        return res.status(500).json({ message: "Error en búsqueda en MySQL" });
+      }
+      res.json(results);
     });
-});
+  });
+  
 
 // MongoDB
 app.get("/buscarMongo", async (req, res) => {
-    try {
-        const { query } = req.query;
-        const results = await Formulario.find({ texto: { $regex: query, $options: 'i' } });
-        res.status(200).json(results);
-    } catch (error) {
-        console.error("Error en la búsqueda MongoDB:", error);
-        res.status(500).json({ message: "Error en la búsqueda MongoDB" });
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: "El parámetro de búsqueda es requerido" });
     }
-});
-
-// INICIAR SERVIDOR
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-});
+    try {
+      const results = await Formulario.find({
+        $or: [
+          { texto: { $regex: query, $options: "i" } },
+          { texto_largo: { $regex: query, $options: "i" } }
+        ]
+      });
+      res.json(results);
+    } catch (error) {
+      console.error("Error en la búsqueda en MongoDB:", error);
+      res.status(500).json({ message: "Error en búsqueda en MongoDB" });
+    }
+  });
+  
