@@ -4,22 +4,21 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const path = require("path");
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static("uploads")); 
+app.use(express.static("uploads"));
 
-//  Configurar conexión a MySQL
+// CONFIGURAR CONEXIÓN A MYSQL
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "", 
+    password: "",
     database: "formulario_crud",
 });
 
-//  Verificar conexión a MySQL
 db.connect((err) => {
     if (err) {
         console.error("Error de conexión a MySQL:", err);
@@ -28,7 +27,7 @@ db.connect((err) => {
     }
 });
 
-//  Conectar a MongoDB con Mongoose
+// CONECTAR A MONGODB CON MONGOOSE
 mongoose.connect("mongodb://localhost:27017/formulario_crud", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -36,7 +35,7 @@ mongoose.connect("mongodb://localhost:27017/formulario_crud", {
 .then(() => console.log("✅ Conectado a MongoDB"))
 .catch((err) => console.error("Error de conexión a MongoDB:", err));
 
-//  Definir el Schema y Modelo para MongoDB
+// DEFINIR EL SCHEMA Y MODELO PARA MONGODB
 const formularioSchema = new mongoose.Schema({
     texto: { type: String, required: true },
     password: { type: String, required: true },
@@ -46,7 +45,6 @@ const formularioSchema = new mongoose.Schema({
 });
 const Formulario = mongoose.model("Formulario", formularioSchema);
 
-
 const storage = multer.diskStorage({
     destination: "./uploads/",
     filename: (req, file, cb) => {
@@ -55,19 +53,23 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-//  Ruta para la página principal
+// FUNCIÓN DE VALIDACIÓN
+function validarTextoLargo(textoLargo) {
+    return !(/^\s|\s$|\s{2,}/.test(textoLargo));
+}
+
+// RUTA PARA LA PÁGINA PRINCIPAL
 app.get("/", (req, res) => {
     res.send("Servidor Express funcionando correctamente.");
 });
 
-
-
-
-// POST - Insertar datos en MySQL
+// ENDPOINTS PARA MYSQL
 app.post("/agregar", upload.single("imagen"), (req, res) => {
     const { texto, password, texto_largo, fecha } = req.body;
+    if (!validarTextoLargo(texto_largo)) {
+        return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+    }
     const imagen = req.file ? req.file.filename : null;
-
     const sql = "INSERT INTO formulario (texto, password, texto_largo, fecha, imagen) VALUES (?, ?, ?, ?, ?)";
     db.query(sql, [texto, password, texto_largo, fecha, imagen], (err, result) => {
         if (err) {
@@ -79,7 +81,6 @@ app.post("/agregar", upload.single("imagen"), (req, res) => {
     });
 });
 
-// GET - Obtener datos de MySQL
 app.get("/datos", (req, res) => {
     const sql = "SELECT * FROM formulario";
     db.query(sql, (err, results) => {
@@ -92,7 +93,6 @@ app.get("/datos", (req, res) => {
     });
 });
 
-// DELETE - Eliminar un dato por ID en MySQL
 app.delete("/eliminar/:id", (req, res) => {
     const { id } = req.params;
     const sql = "DELETE FROM formulario WHERE id = ?";
@@ -106,15 +106,15 @@ app.delete("/eliminar/:id", (req, res) => {
     });
 });
 
-// PUT - Actualizar un dato por ID en MySQL
 app.put("/actualizar/:id", upload.single("imagen"), (req, res) => {
     const { id } = req.params;
     const { texto, password, texto_largo, fecha } = req.body;
+    if (!validarTextoLargo(texto_largo)) {
+        return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+    }
     const imagen = req.file ? req.file.filename : null;
-
     let sql;
     let valores;
-
     if (imagen) {
         sql = "UPDATE formulario SET texto = ?, password = ?, texto_largo = ?, fecha = ?, imagen = ? WHERE id = ?";
         valores = [texto, password, texto_largo, fecha, imagen, id];
@@ -122,7 +122,6 @@ app.put("/actualizar/:id", upload.single("imagen"), (req, res) => {
         sql = "UPDATE formulario SET texto = ?, password = ?, texto_largo = ?, fecha = ? WHERE id = ?";
         valores = [texto, password, texto_largo, fecha, id];
     }
-
     db.query(sql, valores, (err, result) => {
         if (err) {
             console.error("Error al actualizar datos en MySQL:", err);
@@ -133,22 +132,15 @@ app.put("/actualizar/:id", upload.single("imagen"), (req, res) => {
     });
 });
 
-
-
-// POST - Insertar datos en MongoDB
+// ENDPOINTS PARA MONGODB
 app.post("/agregarMongo", upload.single("imagen"), async (req, res) => {
     try {
         const { texto, password, texto_largo, fecha } = req.body;
+        if (!validarTextoLargo(texto_largo)) {
+            return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+        }
         const imagen = req.file ? req.file.filename : null;
-
-        const nuevoFormulario = new Formulario({
-            texto,
-            password,
-            texto_largo,
-            fecha,
-            imagen,
-        });
-
+        const nuevoFormulario = new Formulario({ texto, password, texto_largo, fecha, imagen });
         await nuevoFormulario.save();
         res.status(200).json({ message: "Datos guardados en MongoDB" });
     } catch (error) {
@@ -157,7 +149,6 @@ app.post("/agregarMongo", upload.single("imagen"), async (req, res) => {
     }
 });
 
-// GET - Obtener datos de MongoDB
 app.get("/datosMongo", async (req, res) => {
     try {
         const datos = await Formulario.find();
@@ -168,7 +159,6 @@ app.get("/datosMongo", async (req, res) => {
     }
 });
 
-// DELETE - Eliminar un dato por ID en MongoDB
 app.delete("/eliminarMongo/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -180,18 +170,18 @@ app.delete("/eliminarMongo/:id", async (req, res) => {
     }
 });
 
-// PUT - Actualizar un dato por ID en MongoDB
 app.put("/actualizarMongo/:id", upload.single("imagen"), async (req, res) => {
     try {
         const { id } = req.params;
         const { texto, password, texto_largo, fecha } = req.body;
+        if (!validarTextoLargo(texto_largo)) {
+            return res.status(400).json({ message: "No se permiten espacios en blanco en el campo Texto Largo." });
+        }
         const imagen = req.file ? req.file.filename : null;
-
         const updateData = { texto, password, texto_largo, fecha };
         if (imagen) {
             updateData.imagen = imagen;
         }
-
         await Formulario.findByIdAndUpdate(id, updateData);
         res.status(200).json({ message: "Registro actualizado en MongoDB" });
     } catch (error) {
@@ -200,9 +190,42 @@ app.put("/actualizarMongo/:id", upload.single("imagen"), async (req, res) => {
     }
 });
 
-//  Iniciar servidor
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-});
+// ENDPOINTS PARA BÚSQUEDA
+// MySQL
+app.get("/buscar", (req, res) => {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: "El parámetro de búsqueda es requerido" });
+    }
+    const searchTerm = "%" + query + "%";
+    const sql = "SELECT * FROM formulario WHERE texto LIKE ? OR texto_largo LIKE ?";
+    db.query(sql, [searchTerm, searchTerm], (err, results) => {
+      if (err) {
+        console.error("Error en la búsqueda en MySQL:", err);
+        return res.status(500).json({ message: "Error en búsqueda en MySQL" });
+      }
+      res.json(results);
+    });
+  });
+  
 
+// MongoDB
+app.get("/buscarMongo", async (req, res) => {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: "El parámetro de búsqueda es requerido" });
+    }
+    try {
+      const results = await Formulario.find({
+        $or: [
+          { texto: { $regex: query, $options: "i" } },
+          { texto_largo: { $regex: query, $options: "i" } }
+        ]
+      });
+      res.json(results);
+    } catch (error) {
+      console.error("Error en la búsqueda en MongoDB:", error);
+      res.status(500).json({ message: "Error en búsqueda en MongoDB" });
+    }
+  });
+  
